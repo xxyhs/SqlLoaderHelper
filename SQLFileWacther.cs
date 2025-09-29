@@ -71,7 +71,11 @@ namespace SQLLoadIntelliSense
             var allValidSqlFilePath = allValidSqlFiles.Select(t => t.FullName).ToList();
             var sqlRoots = GetCommonParent(allValidSqlFilePath);
             SQLDict.Clear();
-            var sqlCodes = allValidSqlFilePath.Select(filePath => filePath.Replace(sqlRoots, "").Replace(".sql", "").Replace(Path.DirectorySeparatorChar, '.')).ToList();
+            var sqlCodes = allValidSqlFilePath.Select(filePath => filePath.Replace(sqlRoots, "")
+                .Replace(".sql", "")
+                .Replace(Path.DirectorySeparatorChar, '.')
+                .TrimStart(new char[] { '.' }))
+                .ToList();
             SQLDict.AddRange(sqlCodes);
         }
 
@@ -224,14 +228,12 @@ namespace SQLLoadIntelliSense
         public int OnAfterOpenProject(IVsHierarchy pHierarchy, int fAdded)
         {
             ListSQLFiles();
-            File.WriteAllLines("D:\\debug.txt", SQLDict);
             return VSConstants.S_OK;
         }
 
         // 解决方案关闭后触发
         public int OnQueryCloseProject(IVsHierarchy pHierarchy, int fRemoving, ref int pfCancel)
         {
-            File.WriteAllLines("D:\\debug.txt", SQLDict);
             SQLDict.Clear();
             return VSConstants.S_OK;
         }

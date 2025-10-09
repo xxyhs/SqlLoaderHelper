@@ -3,7 +3,7 @@
     <Metadata>
         <Identity Id="SQLLoadIntelliSense.032501bf-1d21-43bf-90b3-36e350f67b5e" Version="1.0" Language="en-US" Publisher="kailing xiong" />
         <DisplayName>SQLLoadIntelliSense</DisplayName>
-        <Description xml:space="preserve">Intellisense complete for SqlLoader.load(string sqlFileName)SQ</Description>
+        <Description xml:space="preserve">Intellisense complete for SqlLoader.load(string sqlFileName)；the extension collect all .sql file in vs solution for intllisense complete, it would convert rootDir/&lt;&gt; </Description>
     </Metadata>
     <Installation>
         <InstallationTarget Id="Microsoft.VisualStudio.Community" Version="[17.0, 18.0)">

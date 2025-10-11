@@ -13,8 +13,8 @@
     <ProjectGuid>{38333092-8B56-428B-B6BB-17D17B4C8DE9}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>SQLLoadIntelliSense</RootNamespace>
-    <AssemblyName>SQLLoadIntelliSense</AssemblyName>
+    <RootNamespace>SqlLoaderHelper</RootNamespace>
+    <AssemblyName>SqlLoaderHelper</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <GeneratePkgDefFile>true</GeneratePkgDefFile>
     <UseCodebase>true</UseCodebase>
@@ -49,7 +49,7 @@
     <Compile Include="SQLFileWatcher.cs" />
     <Compile Include="SQLGoToDefinitionTextViewCreationListener.cs" />
     <Compile Include="SQLLoadCompletionProvider.cs" />
-    <Compile Include="SQLLoadIntelliSensePackage.cs" />
+    <Compile Include="SQLLoaderHelper.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" />

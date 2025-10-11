@@ -16,7 +16,7 @@ public class SqlLoader
 
         var realpath = fileName.Replace('.', Path.DirectorySeparatorChar);
         realpath += ".sql";
-        var path = Path.Combine(AppContext.BaseDirectory, "SQLs", realpath);
+        var path = Path.Combine(AppContext.BaseDirectory, "SQLs", realpath);// SQLs is the folder name which contains all your sql files, you can change it to your own folder name
         sql = File.ReadAllText(path);
         _cache[fileName] = sql;
         return sql;

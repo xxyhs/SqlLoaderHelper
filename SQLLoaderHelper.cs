@@ -27,11 +27,11 @@ namespace SqlLoaderHelper
     /// </remarks>
     [PackageRegistration(UseManagedResourcesOnly = true, AllowsBackgroundLoading = true)]
     [ProvideAutoLoad(VSConstants.UICONTEXT.SolutionExists_string, PackageAutoLoadFlags.BackgroundLoad)]
-    [Guid(SQLLoadIntelliSensePackage.PackageGuidString)]
-    public sealed class SQLLoadIntelliSensePackage : AsyncPackage
+    [Guid(SQLLoaderHelper.PackageGuidString)]
+    public sealed class SQLLoaderHelper : AsyncPackage
     {
         /// <summary>
-        /// SQLLoadIntelliSensePackage GUID string.
+        /// SQLLoaderHelper GUID string.
         /// </summary>
         public const string PackageGuidString = "0d6bdf2e-9201-4526-bbfb-8ec62663974d";
 

@@ -53,3 +53,8 @@ When you type `SqlLoader.Load("Orde` in your code, the extension will provide yo
 
 
 2.the extension can help you goto the sql file when you press `F12` Or `Ctrl + Click` on the <sqlcode> in SqlLoader.Load("<sqlcode>")
+
+
+## Tips
+
+I Just test the extension in Visual Studio 2022 Community Version, if you find any issue in other versions, please let me know.

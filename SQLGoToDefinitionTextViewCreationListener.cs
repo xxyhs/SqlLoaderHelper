@@ -12,7 +12,7 @@ using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Input;
 
-namespace SQLLoadIntelliSense
+namespace SqlLoaderHelper
 {
     [Export(typeof(IVsTextViewCreationListener))]
     [ContentType("csharp")]  // 指定目标文件类型

@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace SQLLoadIntelliSense
+namespace SqlLoaderHelper
 {
     public class SQLFileWatcher : IVsSolutionEvents, IVsTrackProjectDocumentsEvents2, IDisposable
     {

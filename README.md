@@ -26,9 +26,9 @@ public class SqlLoader
 
 ```
 
-## Example
+## Features
 
-the extension will watch all sql files in your project, the extension will find all sql file's same parent folder as base directory and watch all sql file's change.
+1.the extension will watch all sql files in your project, the extension will find all sql file's same parent folder as base directory and watch all sql file's change.
 for example you store all sql files in a folder named `SQLs`,
 
 SQLs
@@ -50,3 +50,6 @@ the extension will compose a list like below:
 ]
 
 When you type `SqlLoader.Load("Orde` in your code, the extension will provide you with a list like "Orders.CreateOrder", "Orders.UpdateOrder".
+
+
+2.the extension can help you goto the sql file when you press `F12` Or `Ctrl + Click` on the <sqlcode> in SqlLoader.Load("<sqlcode>")

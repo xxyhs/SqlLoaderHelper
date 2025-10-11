@@ -55,7 +55,7 @@ namespace SQLLoadIntelliSense
             var trackProjectDocument2 = await GetServiceAsync(typeof(SVsTrackProjectDocuments)) as IVsTrackProjectDocuments2;
             if (solutionService != null)
             {
-                var watcher = new SQLFileWacther(trackProjectDocument2, solutionService);
+                var watcher = new SQLFileWatcher(trackProjectDocument2, solutionService);
             }
         }
 

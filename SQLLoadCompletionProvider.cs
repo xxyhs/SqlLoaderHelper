@@ -29,7 +29,7 @@ namespace SQLLoadIntelliSense
                 return;
 
             // 过滤缓存的 SQL 文件
-            var matches = SQLFileWacther.SQLDict
+            var matches = SQLFileWatcher.SQLDict
                 .Where(f => f.StartsWith(prefix, System.StringComparison.OrdinalIgnoreCase));
 
             foreach (var match in matches)

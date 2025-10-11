@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace SQLLoadIntelliSense
 {
-    public class SQLFileWacther : IVsSolutionEvents, IVsTrackProjectDocumentsEvents2, IDisposable
+    public class SQLFileWatcher : IVsSolutionEvents, IVsTrackProjectDocumentsEvents2, IDisposable
     {
         private readonly IVsTrackProjectDocuments2 _tracker;
         private uint _trackCookie;
@@ -17,7 +17,9 @@ namespace SQLLoadIntelliSense
 
         public static List<string> SQLDict = new List<string>();
 
-        public SQLFileWacther(IVsTrackProjectDocuments2 tracker, IVsSolution solutionService)
+        public static string SQLRoot = string.Empty;
+
+        public SQLFileWatcher(IVsTrackProjectDocuments2 tracker, IVsSolution solutionService)
         {
             Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
             _tracker = tracker;
@@ -69,14 +71,30 @@ namespace SQLLoadIntelliSense
             FileInfo[] sqlFiles = directoryInfo.GetFiles("*.sql", SearchOption.AllDirectories);
             var allValidSqlFiles = sqlFiles.Where(f => !excludeDir.Any(exd => f.FullName.IndexOf(exd) >= 0));
             var allValidSqlFilePath = allValidSqlFiles.Select(t => t.FullName).ToList();
-            var sqlRoots = GetCommonParent(allValidSqlFilePath);
+            SQLRoot = GetCommonParent(allValidSqlFilePath);
             SQLDict.Clear();
-            var sqlCodes = allValidSqlFilePath.Select(filePath => filePath.Replace(sqlRoots, "")
+            var sqlCodes = allValidSqlFilePath.Select(filePath => filePath.Replace(SQLRoot, "")
                 .Replace(".sql", "")
                 .Replace(Path.DirectorySeparatorChar, '.')
                 .TrimStart(new char[] { '.' }))
                 .ToList();
             SQLDict.AddRange(sqlCodes);
+        }
+
+        public static string GetCorrespondingPathByCode(string code)
+        {
+            // Implement your logic to get the corresponding file path based on the code
+            // This is a placeholder implementation
+            if (string.IsNullOrEmpty(SQLRoot))
+            {
+                return string.Empty;
+            }
+            if (!SQLDict.Contains(code))
+            {
+                return string.Empty;
+            }
+
+            return Path.Combine(SQLRoot, code.Replace('.', Path.DirectorySeparatorChar) + ".sql");
         }
 
         public int OnQueryAddFiles(IVsProject pProject, int cFiles, string[] rgpszMkDocuments, VSQUERYADDFILEFLAGS[] rgFlags, VSQUERYADDFILERESULTS[] pSummaryResult, VSQUERYADDFILERESULTS[] rgResults)

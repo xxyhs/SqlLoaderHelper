@@ -33,6 +33,10 @@ namespace SqlLoaderHelper
             "bin", "obj", "Debug", "Release"
         };
 
+        public void Init()
+        {
+            ListSQLFiles();
+        }
         /// <summary>
         /// 获取所有文件的最近公共父目录
         /// </summary>
@@ -245,24 +249,24 @@ namespace SqlLoaderHelper
         // 解决方案打开后触发
         public int OnAfterOpenProject(IVsHierarchy pHierarchy, int fAdded)
         {
-            ListSQLFiles();
             return VSConstants.S_OK;
         }
 
         // 解决方案关闭后触发
         public int OnQueryCloseProject(IVsHierarchy pHierarchy, int fRemoving, ref int pfCancel)
         {
-            SQLDict.Clear();
             return VSConstants.S_OK;
         }
 
         public int OnBeforeCloseProject(IVsHierarchy pHierarchy, int fRemoved)
         {
+            SQLDict.Clear();
             return VSConstants.S_OK;
         }
 
         public int OnAfterLoadProject(IVsHierarchy pStubHierarchy, IVsHierarchy pRealHierarchy)
         {
+            ListSQLFiles();
             return VSConstants.S_OK;
         }
 
@@ -278,6 +282,7 @@ namespace SqlLoaderHelper
 
         public int OnAfterOpenSolution(object pUnkReserved, int fNewSolution)
         {
+            ListSQLFiles();
             return VSConstants.S_OK;
         }
 
@@ -288,6 +293,7 @@ namespace SqlLoaderHelper
 
         public int OnBeforeCloseSolution(object pUnkReserved)
         {
+            SQLDict.Clear();
             return VSConstants.S_OK;
         }
 

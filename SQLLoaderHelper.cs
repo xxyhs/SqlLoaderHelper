@@ -56,6 +56,7 @@ namespace SqlLoaderHelper
             if (solutionService != null)
             {
                 var watcher = new SQLFileWatcher(trackProjectDocument2, solutionService);
+                watcher.Init();
             }
         }
 

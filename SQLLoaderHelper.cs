@@ -4,7 +4,7 @@ using Microsoft.VisualStudio.Shell.Interop;
 using System;
 using System.Runtime.InteropServices;
 using System.Threading;
-using Task = System.Threading.Tasks.Task;
+using System.Threading.Tasks;
 
 namespace SqlLoaderHelper
 {

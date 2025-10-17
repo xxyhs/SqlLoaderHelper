@@ -19,6 +19,10 @@ namespace SqlLoaderHelper
 
         public static string SQLRoot = string.Empty;
 
+        private static bool _loading = false;
+
+        private static readonly object _lock = new object();
+
         public SQLFileWatcher(IVsTrackProjectDocuments2 tracker, IVsSolution solutionService)
         {
             Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
@@ -28,7 +32,7 @@ namespace SqlLoaderHelper
             _solutionService.AdviseSolutionEvents(this, out _slnCooke);
         }
 
-        private static string[] excludeDir = new string[]
+        private static readonly string[] excludeDir = new string[]
         {
             "bin", "obj", "Debug", "Release"
         };
@@ -70,19 +74,35 @@ namespace SqlLoaderHelper
         private void ListSQLFiles()
         {
             ThreadHelper.ThrowIfNotOnUIThread();
+            lock (_lock)
+            {
+                if (_loading)
+                {
+                    return;
+                }
+                _loading = true;
+            }
             _solutionService.GetSolutionInfo(out string solutionDir, out string solutionFile, out string userOptsFile);
             DirectoryInfo directoryInfo = new DirectoryInfo(solutionDir);
             FileInfo[] sqlFiles = directoryInfo.GetFiles("*.sql", SearchOption.AllDirectories);
             var allValidSqlFiles = sqlFiles.Where(f => !excludeDir.Any(exd => f.FullName.IndexOf(exd) >= 0));
             var allValidSqlFilePath = allValidSqlFiles.Select(t => t.FullName).ToList();
-            SQLRoot = GetCommonParent(allValidSqlFilePath);
-            SQLDict.Clear();
+            if (string.IsNullOrEmpty(SQLRoot))
+            {
+                SQLRoot = GetCommonParent(allValidSqlFilePath);
+            }
             var sqlCodes = allValidSqlFilePath.Select(filePath => filePath.Replace(SQLRoot, "")
                 .Replace(".sql", "")
                 .Replace(Path.DirectorySeparatorChar, '.')
                 .TrimStart(new char[] { '.' }))
                 .ToList();
+            SQLDict.Clear();
             SQLDict.AddRange(sqlCodes);
+
+            lock (_lock)
+            {
+                _loading = false;
+            }
         }
 
         public static string GetCorrespondingPathByCode(string code)

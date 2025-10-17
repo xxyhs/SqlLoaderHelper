@@ -30,23 +30,29 @@ public class SqlLoader
 
 1.the extension will watch all sql files in your project, the extension will find all sql file's same parent folder as base directory and watch all sql file's change.
 for example you store all sql files in a folder named `SQLs`,
-
-SQLs
-  >ListAreas.sql
-  >Users
-	- CreateUser.sql
-	- GetUsers.sql
-  >Orders
-	- CreateOrder.sql
-	- UpdateOrder.sql
-
+```
+your_solution.sln
+project/
+|-- OtherFiles/
+|-- SQLs/
+| |-- ListAreas.sql
+| |-- Users/
+| | |-- CreateUser.sql
+| | |-- GetUsers.sql
+| |-- Orders/
+| | |-- CreateOrder.sql
+| | |-- UpdateOrder.sql
+| | |-- AfterSale/
+| | | |-- CreateAfterSale.sql
+```
 the extension will compose a list like below:
 [
 	"ListAreas",
 	"Users.CreateUser"
 	"Users.GetUsers",
 	"Orders.CreateOrder",
-	"Orders.UpdateOrder"
+	"Orders.UpdateOrder",
+    "Orders.AfterSale.CreateAfterSale"
 ]
 
 When you type `SqlLoader.Load("Orde` in your code, the extension will provide you with a list like "Orders.CreateOrder", "Orders.UpdateOrder".

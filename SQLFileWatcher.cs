@@ -8,13 +8,8 @@ using System.Linq;
 
 namespace SqlLoaderHelper
 {
-    public class SQLFileWatcher : IVsSolutionEvents, IVsTrackProjectDocumentsEvents2, IDisposable
+    public class SQLFileWatcher : IVsSolutionEvents, IDisposable
     {
-        private readonly IVsTrackProjectDocuments2 _tracker;
-        private uint _trackCookie;
-        private readonly IVsSolution _solutionService;
-        private uint _slnCooke;
-
         public static List<string> SQLDict = new List<string>();
 
         public static string SQLRoot = string.Empty;
@@ -23,55 +18,38 @@ namespace SqlLoaderHelper
 
         private static readonly object _lock = new object();
 
-        public SQLFileWatcher(IVsTrackProjectDocuments2 tracker, IVsSolution solutionService)
+        private readonly IVsSolution _solutionService;
+
+        private uint _slnCooke;
+
+        private FileSystemWatcher fileSystemWatcher;
+
+        public SQLFileWatcher(IVsSolution solutionService, string rootDir)
         {
-            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
-            _tracker = tracker;
-            _tracker.AdviseTrackProjectDocumentsEvents(this, out _trackCookie);
+            ThreadHelper.ThrowIfNotOnUIThread();
+            SQLRoot = rootDir;
             _solutionService = solutionService;
             _solutionService.AdviseSolutionEvents(this, out _slnCooke);
         }
 
-        private static readonly string[] excludeDir = new string[]
-        {
-            "bin", "obj", "Debug", "Release"
-        };
-
-        public void Init()
-        {
-            ListSQLFiles();
-        }
         /// <summary>
-        /// 获取所有文件的最近公共父目录
+        /// 将sql文件转换成code
         /// </summary>
-        private static string GetCommonParent(List<string> files)
+        private static void CalcCodeDict(List<string> files)
         {
             if (files == null || files.Count == 0)
-                return string.Empty;
+                return;
 
-            var splitPaths = files
-                .Select(f => f.Split(Path.DirectorySeparatorChar))
-                .ToList();
-
-            var first = splitPaths[0];
-            int commonLength = first.Length;
-
-            for (int i = 1; i < splitPaths.Count; i++)
+            SQLDict = files.Where(t => t.StartsWith(SQLRoot)).Select(t =>
             {
-                commonLength = Math.Min(commonLength, splitPaths[i].Length);
-                for (int j = 0; j < commonLength; j++)
-                {
-                    if (!string.Equals(first[j], splitPaths[i][j], StringComparison.OrdinalIgnoreCase))
-                    {
-                        commonLength = j;
-                        break;
-                    }
-                }
-            }
-
-            return string.Join(Path.DirectorySeparatorChar.ToString(), first.Take(commonLength));
+                return t.Replace(SQLRoot, "").Replace(".sql", "")
+                     .Trim(new char[] { Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar })
+                     .Replace(Path.DirectorySeparatorChar, '.')
+                     .Replace(Path.AltDirectorySeparatorChar, '.');
+            }).ToList();
         }
-        private void ListSQLFiles()
+
+        public void RebuildSolutionIndex()
         {
             ThreadHelper.ThrowIfNotOnUIThread();
             lock (_lock)
@@ -82,183 +60,103 @@ namespace SqlLoaderHelper
                 }
                 _loading = true;
             }
-            _solutionService.GetSolutionInfo(out string solutionDir, out string solutionFile, out string userOptsFile);
-            DirectoryInfo directoryInfo = new DirectoryInfo(solutionDir);
-            FileInfo[] sqlFiles = directoryInfo.GetFiles("*.sql", SearchOption.AllDirectories);
-            var allValidSqlFiles = sqlFiles.Where(f => !excludeDir.Any(exd => f.FullName.IndexOf(exd) >= 0));
-            var allValidSqlFilePath = allValidSqlFiles.Select(t => t.FullName).ToList();
-            if (string.IsNullOrEmpty(SQLRoot))
-            {
-                SQLRoot = GetCommonParent(allValidSqlFilePath);
-            }
-            var sqlCodes = allValidSqlFilePath.Select(filePath => filePath.Replace(SQLRoot, "")
-                .Replace(".sql", "")
-                .Replace(Path.DirectorySeparatorChar, '.')
-                .TrimStart(new char[] { '.' }))
-                .ToList();
-            SQLDict.Clear();
-            SQLDict.AddRange(sqlCodes);
-
+            DirectoryInfo directoryInfo = new DirectoryInfo(SQLRoot);
+            var sqlFiles = directoryInfo.GetFiles("*.sql", SearchOption.AllDirectories).Select(t => t.FullName).ToList();
+            CalcCodeDict(sqlFiles);
             lock (_lock)
             {
                 _loading = false;
             }
         }
 
+
         public static string GetCorrespondingPathByCode(string code)
         {
-            // Implement your logic to get the corresponding file path based on the code
-            // This is a placeholder implementation
             if (string.IsNullOrEmpty(SQLRoot))
             {
                 return string.Empty;
             }
-            if (!SQLDict.Contains(code))
-            {
-                return string.Empty;
-            }
-
             return Path.Combine(SQLRoot, code.Replace('.', Path.DirectorySeparatorChar) + ".sql");
         }
 
-        public int OnQueryAddFiles(IVsProject pProject, int cFiles, string[] rgpszMkDocuments, VSQUERYADDFILEFLAGS[] rgFlags, VSQUERYADDFILERESULTS[] pSummaryResult, VSQUERYADDFILERESULTS[] rgResults)
+        public static string GetCodeByFilePath(string filePath)
         {
-            return VSConstants.S_OK;
-        }
-
-        /// <summary>
-        /// 新建文件
-        /// </summary>
-        /// <param name="cProjects"></param>
-        /// <param name="cFiles"></param>
-        /// <param name="rgpProjects"></param>
-        /// <param name="rgFirstIndices"></param>
-        /// <param name="rgpszMkDocuments"></param>
-        /// <param name="rgFlags"></param>
-        /// <returns></returns>
-        public int OnAfterAddFilesEx(int cProjects, int cFiles, IVsProject[] rgpProjects, int[] rgFirstIndices, string[] rgpszMkDocuments, VSADDFILEFLAGS[] rgFlags)
-        {
-            if(rgpszMkDocuments.Any(t => t.EndsWith(".sql"))) {
-                ListSQLFiles();
+            if (string.IsNullOrEmpty(SQLRoot))
+            {
+                return string.Empty;
             }
-            return VSConstants.S_OK;
+            var relativePath = filePath.Substring(SQLRoot.Length).TrimStart(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+            var code = relativePath.Replace(".sql", "").Replace(Path.DirectorySeparatorChar, '.').Replace(Path.AltDirectorySeparatorChar, '.').Trim(new char[] { '.' });
+            return code;
         }
 
-        public int OnAfterAddDirectoriesEx(int cProjects, int cDirectories, IVsProject[] rgpProjects, int[] rgFirstIndices, string[] rgpszMkDocuments, VSADDDIRECTORYFLAGS[] rgFlags)
+        public void InitWatch()
         {
-            return VSConstants.S_OK;
-        }
-
-        public int OnAfterRemoveFiles(int cProjects, int cFiles, IVsProject[] rgpProjects, int[] rgFirstIndices, string[] rgpszMkDocuments, VSREMOVEFILEFLAGS[] rgFlags)
-        {
-            if (rgpszMkDocuments.Any(t => t.EndsWith(".sql"))) {
-                ListSQLFiles();
+            ThreadHelper.ThrowIfNotOnUIThread();
+            if (fileSystemWatcher != null)
+            {
+                fileSystemWatcher.Dispose();
+                fileSystemWatcher = null;
             }
-            return VSConstants.S_OK;
+            fileSystemWatcher = new FileSystemWatcher(SQLRoot)
+            {
+                IncludeSubdirectories = true,
+                NotifyFilter = NotifyFilters.FileName | NotifyFilters.DirectoryName,
+                EnableRaisingEvents = true
+            };
+            fileSystemWatcher.Created += (sender, args) =>
+            {
+                if (args.FullPath.EndsWith(".sql"))
+                {
+                    SQLDict.Add(GetCodeByFilePath(args.FullPath));
+                }
+            };
+            fileSystemWatcher.Deleted += (sender, args) =>
+            {
+                var code = GetCodeByFilePath(args.FullPath);
+                if (args.FullPath.EndsWith(".sql"))
+                {
+                    SQLDict.Remove(code);
+                }
+                else
+                {
+                    SQLDict.RemoveAll(t => t.StartsWith(code));
+                }
+            };
+            fileSystemWatcher.Renamed += (sender, args) =>
+            {
+                var oldFullPath = args.OldFullPath;
+                var newFullPath = args.FullPath;
+                var newCode = GetCodeByFilePath(newFullPath);
+                var oldCode = GetCodeByFilePath(oldFullPath);
+                if (newFullPath.EndsWith(".sql"))
+                {
+                    SQLDict.Add(newCode);
+                }
+                if (oldFullPath.EndsWith(".sql"))
+                {
+                    SQLDict.Remove(oldCode);
+                }
+                else
+                {
+                    for (var i = 0; i < SQLDict.Count; i++)
+                    {
+                        if (SQLDict[i].StartsWith(oldCode))
+                        {
+                            SQLDict[i] = SQLDict[i].Replace(oldCode, newCode);
+                        }
+                    }
+                }
+            };
+            fileSystemWatcher.Changed += (sender, args) => {
+                RebuildSolutionIndex();
+            };
         }
-
-        /// <summary>
-        /// 删除文件夹
-        /// </summary>
-        /// <param name="cProjects"></param>
-        /// <param name="cDirectories"></param>
-        /// <param name="rgpProjects"></param>
-        /// <param name="rgFirstIndices"></param>
-        /// <param name="rgpszMkDocuments"></param>
-        /// <param name="rgFlags"></param>
-        /// <returns></returns>
-        public int OnAfterRemoveDirectories(int cProjects, int cDirectories, IVsProject[] rgpProjects, int[] rgFirstIndices, string[] rgpszMkDocuments, VSREMOVEDIRECTORYFLAGS[] rgFlags)
-        {
-            ListSQLFiles();
-            return VSConstants.S_OK;
-        }
-
-        public int OnQueryRenameFiles(IVsProject pProject, int cFiles, string[] rgszMkOldNames, string[] rgszMkNewNames, VSQUERYRENAMEFILEFLAGS[] rgFlags, VSQUERYRENAMEFILERESULTS[] pSummaryResult, VSQUERYRENAMEFILERESULTS[] rgResults)
-        {
-            return VSConstants.S_OK;
-        }
-
-        /// <summary>
-        /// 重命名文件
-        /// </summary>
-        /// <param name="cProjects"></param>
-        /// <param name="cFiles"></param>
-        /// <param name="rgpProjects"></param>
-        /// <param name="rgFirstIndices"></param>
-        /// <param name="rgszMkOldNames"></param>
-        /// <param name="rgszMkNewNames"></param>
-        /// <param name="rgFlags"></param>
-        /// <returns></returns>
-        public int OnAfterRenameFiles(int cProjects, int cFiles, IVsProject[] rgpProjects, int[] rgFirstIndices, string[] rgszMkOldNames, string[] rgszMkNewNames, VSRENAMEFILEFLAGS[] rgFlags)
-        {
-            if (rgszMkNewNames.Any(t => t.EndsWith(".sql"))) {
-                ListSQLFiles();
-            }
-            return VSConstants.S_OK;
-        }
-
-        public int OnQueryRenameDirectories(IVsProject pProject, int cDirs, string[] rgszMkOldNames, string[] rgszMkNewNames, VSQUERYRENAMEDIRECTORYFLAGS[] rgFlags, VSQUERYRENAMEDIRECTORYRESULTS[] pSummaryResult, VSQUERYRENAMEDIRECTORYRESULTS[] rgResults)
-        {
-            return VSConstants.S_OK;
-        }
-
-        /// <summary>
-        /// 重命名文件夹
-        /// </summary>
-        /// <param name="cProjects"></param>
-        /// <param name="cDirs"></param>
-        /// <param name="rgpProjects"></param>
-        /// <param name="rgFirstIndices"></param>
-        /// <param name="rgszMkOldNames"></param>
-        /// <param name="rgszMkNewNames"></param>
-        /// <param name="rgFlags"></param>
-        /// <returns></returns>
-        public int OnAfterRenameDirectories(int cProjects, int cDirs, IVsProject[] rgpProjects, int[] rgFirstIndices, string[] rgszMkOldNames, string[] rgszMkNewNames, VSRENAMEDIRECTORYFLAGS[] rgFlags)
-        {
-            ListSQLFiles();
-            return VSConstants.S_OK;
-        }
-
-        public int OnQueryAddDirectories(IVsProject pProject, int cDirectories, string[] rgpszMkDocuments, VSQUERYADDDIRECTORYFLAGS[] rgFlags, VSQUERYADDDIRECTORYRESULTS[] pSummaryResult, VSQUERYADDDIRECTORYRESULTS[] rgResults)
-        {
-            return VSConstants.S_OK;
-        }
-
-        public int OnQueryRemoveFiles(IVsProject pProject, int cFiles, string[] rgpszMkDocuments, VSQUERYREMOVEFILEFLAGS[] rgFlags, VSQUERYREMOVEFILERESULTS[] pSummaryResult, VSQUERYREMOVEFILERESULTS[] rgResults)
-        {
-            return VSConstants.S_OK;
-        }
-
-        public int OnQueryRemoveDirectories(IVsProject pProject, int cDirectories, string[] rgpszMkDocuments, VSQUERYREMOVEDIRECTORYFLAGS[] rgFlags, VSQUERYREMOVEDIRECTORYRESULTS[] pSummaryResult, VSQUERYREMOVEDIRECTORYRESULTS[] rgResults)
-        {
-            ListSQLFiles();
-            return VSConstants.S_OK;
-        }
-
-        /// <summary>
-        /// 源代码控制变化 git 等
-        /// </summary>
-        /// <param name="cProjects"></param>
-        /// <param name="cFiles"></param>
-        /// <param name="rgpProjects"></param>
-        /// <param name="rgFirstIndices"></param>
-        /// <param name="rgpszMkDocuments"></param>
-        /// <param name="rgdwSccStatus"></param>
-        /// <returns></returns>
-        public int OnAfterSccStatusChanged(int cProjects, int cFiles, IVsProject[] rgpProjects, int[] rgFirstIndices, string[] rgpszMkDocuments, uint[] rgdwSccStatus)
-        {
-            ListSQLFiles();
-            return VSConstants.S_OK;
-        }
-
         public void Dispose()
         {
-            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
-            if (_trackCookie != 0)
-            {
-                _tracker.UnadviseTrackProjectDocumentsEvents(_trackCookie);
-                _trackCookie = 0;
-            }
+            ThreadHelper.ThrowIfNotOnUIThread();
+            SQLDict.Clear();
+            fileSystemWatcher.Dispose();
             if (_slnCooke != 0)
             {
                 _solutionService.UnadviseSolutionEvents(_slnCooke);
@@ -266,13 +164,11 @@ namespace SqlLoaderHelper
             }
         }
 
-        // 解决方案打开后触发
         public int OnAfterOpenProject(IVsHierarchy pHierarchy, int fAdded)
         {
             return VSConstants.S_OK;
         }
 
-        // 解决方案关闭后触发
         public int OnQueryCloseProject(IVsHierarchy pHierarchy, int fRemoving, ref int pfCancel)
         {
             return VSConstants.S_OK;
@@ -280,13 +176,11 @@ namespace SqlLoaderHelper
 
         public int OnBeforeCloseProject(IVsHierarchy pHierarchy, int fRemoved)
         {
-            SQLDict.Clear();
             return VSConstants.S_OK;
         }
 
         public int OnAfterLoadProject(IVsHierarchy pStubHierarchy, IVsHierarchy pRealHierarchy)
         {
-            ListSQLFiles();
             return VSConstants.S_OK;
         }
 
@@ -302,7 +196,8 @@ namespace SqlLoaderHelper
 
         public int OnAfterOpenSolution(object pUnkReserved, int fNewSolution)
         {
-            ListSQLFiles();
+            RebuildSolutionIndex();
+            InitWatch();
             return VSConstants.S_OK;
         }
 
@@ -313,12 +208,12 @@ namespace SqlLoaderHelper
 
         public int OnBeforeCloseSolution(object pUnkReserved)
         {
-            SQLDict.Clear();
             return VSConstants.S_OK;
         }
 
         public int OnAfterCloseSolution(object pUnkReserved)
         {
+            Dispose();
             return VSConstants.S_OK;
         }
     }

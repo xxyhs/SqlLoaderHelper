@@ -70,8 +70,9 @@ namespace SqlLoaderHelper
                 var textViewLine = _view.TextViewLines.GetTextViewLineContainingYCoordinate(position.Y);
                 if (textViewLine == null) return;
                 var line = textViewLine.Extent.GetText();
-                Match match = Regex.Match(line, Pattern);
-                if (match.Success)
+                var matches = Regex.Matches(line, Pattern);
+                if (matches.Count == 0) return;
+                foreach (Match match in matches)
                 {
                     var bufferPosition = textViewLine.GetBufferPositionFromXCoordinate(position.X);
                     string sqlName = match.Groups[1].Value;
@@ -122,8 +123,9 @@ namespace SqlLoaderHelper
                 var caret = _view.Caret.Position.BufferPosition;
                 var line = caret.GetContainingLine().GetText();
                 var lineStart = caret.GetContainingLine().Start;
-                Match match = Regex.Match(line, Pattern);
-                if (match.Success)
+                var matches = Regex.Matches(line, Pattern);
+                if (matches.Count == 0) return VSConstants.S_OK;
+                foreach (Match match in matches)
                 {
                     string sqlName = match.Groups[1].Value;
                     var sqlStartIndex = match.Groups[1].Index + lineStart ;

@@ -2,6 +2,8 @@
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using System;
+using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -52,14 +54,26 @@ namespace SqlLoaderHelper
 
             // 初始化 SQL 文件监听器
             var solutionService = await GetServiceAsync(typeof(SVsSolution)) as IVsSolution;
-            var trackProjectDocument2 = await GetServiceAsync(typeof(SVsTrackProjectDocuments)) as IVsTrackProjectDocuments2;
             if (solutionService != null)
             {
-                var watcher = new SQLFileWatcher(trackProjectDocument2, solutionService);
-                watcher.Init();
+                solutionService.GetSolutionInfo(out string solutionDirectory, out string solutionFile, out string userOptsFile);
+                if (string.IsNullOrEmpty(solutionFile)) return;
+
+                var sqlLoaderHelperConfig = File.ReadAllLines(solutionFile).FirstOrDefault(t => t.Contains("SQLRoot"));
+                if (String.IsNullOrEmpty(sqlLoaderHelperConfig)) return;
+
+                var rootDir = sqlLoaderHelperConfig.Replace("SQLRoot", "").Replace("=", "").Trim();
+
+                var rootFullPath = Path.GetFullPath(Path.Combine(solutionDirectory, rootDir));
+
+                if (!string.IsNullOrEmpty(rootDir) && Directory.Exists(rootFullPath))
+                {
+                    var sQLFileWatcher = new SQLFileWatcher(solutionService, rootFullPath);
+                    sQLFileWatcher.RebuildSolutionIndex();
+                    sQLFileWatcher.InitWatch();
+                }
             }
         }
-
         #endregion
     }
 }

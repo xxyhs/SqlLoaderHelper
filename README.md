@@ -1,7 +1,32 @@
 ﻿
 the extension will search for all the sql files in your project and provide you with a list of file names to choose from when you type `SqlLoader.Load("` in your code.
 
+
+Version 1.2 optimized the performance of monitoring changes to SQL files. This requires some configuration of the solution file; simply add the relative path between the SQL file root directory and the solution file, as shown in the code below.
+
+```
+...
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+		SQLRoot = ./SQLs            //add the sql file's root directory relative path
+	EndGlobalSection
+...
+```
+
+This VSIX extension will determine whether to enable it based on whether SQLRoot is set.
+
+Additionally, we need to add the following configuration to the .csproj file corresponding to the project containing the sql folder to ensure that all directories and sql files under the sql folder are completely output to the compiled folder after the project is compiled.
+
+```
+<ItemGroup>
+	<Content Include="SQLs\**\*.sql">
+		<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	</Content>
+  </ItemGroup>
+```
+
 ## SqlLoader Code
+
 you need to create a class named `SqlLoader` in your project, the class should like below:
 
 ```csharp

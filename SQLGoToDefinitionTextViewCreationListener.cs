@@ -124,7 +124,7 @@ namespace SqlLoaderHelper
                 var line = caret.GetContainingLine().GetText();
                 var lineStart = caret.GetContainingLine().Start;
                 var matches = Regex.Matches(line, Pattern);
-                if (matches.Count == 0) return VSConstants.S_OK;
+                if (matches.Count == 0) return _nextCommandTarget.Exec(ref pguidCmdGroup, nCmdID, nCmdexecopt, pvaIn, pvaOut);
                 foreach (Match match in matches)
                 {
                     string sqlName = match.Groups[1].Value;

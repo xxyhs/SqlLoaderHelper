@@ -35,7 +35,7 @@ namespace SqlLoaderHelper
         /// <summary>
         /// SQLLoaderHelper GUID string.
         /// </summary>
-        public const string PackageGuidString = "0d6bdf2e-9201-4526-bbfb-8ec62663974d";
+        public const string PackageGuidString = "0d6bdf2e-9201-4526-bbfb-8ec62663974e";
 
         #region Package Members
 

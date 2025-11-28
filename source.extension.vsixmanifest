@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
     <Metadata>
-        <Identity Id="SqlLoaderHelper.0d6bdf2e-9201-4526-bbfb-8ec6266397ed" Version="1.2.3" Language="en-US" Publisher="kailing xiong" />
+        <Identity Id="SqlLoaderHelper.6f315631-bb1b-449d-8213-a40784dc2bf5" Version="1.2.3" Language="en-US" Publisher="kailing xiong" />
         <DisplayName>SqlLoaderHelper</DisplayName>
-        <Description xml:space="preserve">This is a Visual Studio extension that helps you easily manage a large number of SQL files in C# projects. Its main features include providing automatic SQL file name suggestions and enabling navigation from code to the corresponding SQL file.</Description>
+        <Description xml:space="preserve">This is a Visual Studio extension that helps you manage sql files in C# projects. Its main features include sql autocomplete in code and support navigation between code and sql file</Description>
         <MoreInfo>https://github.com/kailingxiong/SqlLoaderHelper</MoreInfo>
         <License>license.txt</License>
     </Metadata>

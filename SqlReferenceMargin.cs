@@ -87,7 +87,7 @@ namespace SqlLoaderHelper
             {
                 await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
 
-                var code = SQLFileCache.GetCodeByFilePath(_filePath);
+                var code = SqlFileCache.GetCodeByFilePath(_filePath);
 
                 int count = SqlReferenceAnalyzer.Instance.GetCount(code);
 
@@ -157,7 +157,7 @@ namespace SqlLoaderHelper
                 VsBrushes.ToolWindowBackgroundKey);
 
             if (SqlReferenceAnalyzer.Instance.References.TryGetValue(
-                SQLFileCache.GetCodeByFilePath(_filePath),
+                SqlFileCache.GetCodeByFilePath(_filePath),
                 out var references))
             {
 

@@ -49,13 +49,12 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="DebugLogger.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SlnConfig.cs" />
-    <Compile Include="SQLFileCache.cs" />
-    <Compile Include="SQLGoToDefinitionTextViewCreationListener.cs" />
-    <Compile Include="SQLLoadCompletionProvider.cs" />
-    <Compile Include="SQLLoaderHelper.cs" />
+    <Compile Include="SqlFileCache.cs" />
+    <Compile Include="SqlGoToDefinitionTextViewCreationListener.cs" />
+    <Compile Include="SqlLoadCompletionProvider.cs" />
+    <Compile Include="SqlLoaderHelper.cs" />
     <Compile Include="SqlReferenceAnalyzer.cs" />
     <Compile Include="SqlReferenceMargin.cs" />
     <Compile Include="SqlReferenceMarginProvider.cs" />

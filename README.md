@@ -1,8 +1,7 @@
-﻿
-the extension will search for all the sql files in your project and provide you with a list of file names to choose from when you type `SqlLoader.Load("` in your code.
+﻿This is a Visual Studio extension that helps you manage sql files in C# projects. Its main features include sql autocomplete in code and support navigation between code and sql file;
 
-
-Version 1.2 optimized the performance of monitoring changes to SQL files. This requires some configuration of the solution file; simply add the relative path between the SQL file root directory and the solution file, as shown in the code below.
+## Prerequisites
+This requires some configuration of the solution file; simply add the relative path between the SQL file root directory and the solution file, as shown in the code below.
 
 ```
 ...

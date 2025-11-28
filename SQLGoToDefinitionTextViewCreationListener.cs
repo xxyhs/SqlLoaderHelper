@@ -17,7 +17,7 @@ namespace SqlLoaderHelper
     [Export(typeof(IVsTextViewCreationListener))]
     [ContentType("csharp")]  // 指定目标文件类型
     [TextViewRole(PredefinedTextViewRoles.Editable)]
-    internal class SQLGoToDefinitionTextViewCreationListener : IVsTextViewCreationListener
+    internal class SqlGoToDefinitionTextViewCreationListener : IVsTextViewCreationListener
     {
         [Import]
         internal IVsEditorAdaptersFactoryService AdapterService = null;
@@ -80,7 +80,7 @@ namespace SqlLoaderHelper
                     var sqlEndIndex = sqlStartIndex + match.Groups[1].Length;
                     if (bufferPosition >= sqlStartIndex && bufferPosition <= sqlEndIndex)
                     {
-                        var filePath = SQLFileWatcher.GetCorrespondingPathByCode(sqlName);
+                        var filePath = SqlFileCache.GetCorrespondingPathByCode(sqlName);
                         if (!string.IsNullOrEmpty(filePath) && File.Exists(filePath))
                         {
                             ThreadHelper.JoinableTaskFactory.Run(async delegate
@@ -132,7 +132,7 @@ namespace SqlLoaderHelper
                     var sqlEndIndex = sqlStartIndex + match.Groups[1].Length;
                     if (caret.Position >= sqlStartIndex && caret.Position <= sqlEndIndex)
                     {
-                        var filePath = SQLFileWatcher.GetCorrespondingPathByCode(sqlName);
+                        var filePath = SqlFileCache.GetCorrespondingPathByCode(sqlName);
                         if (!string.IsNullOrEmpty(filePath) && File.Exists(filePath))
                         {
                             ThreadHelper.JoinableTaskFactory.Run(async delegate

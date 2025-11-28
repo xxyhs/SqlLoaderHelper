@@ -10,9 +10,9 @@ using System.Threading.Tasks;
 
 namespace SqlLoaderHelper
 {
-    [ExportCompletionProvider(nameof(SQLLoadCompletionProvider), LanguageNames.CSharp)]
+    [ExportCompletionProvider(nameof(SqlLoadCompletionProvider), LanguageNames.CSharp)]
     [Shared]
-    public class SQLLoadCompletionProvider : CompletionProvider
+    public class SqlLoadCompletionProvider : CompletionProvider
     {
         public override async Task<CompletionChange> GetChangeAsync(Document document, CompletionItem item, char? commitKey, CancellationToken cancellationToken)
         {
@@ -54,7 +54,7 @@ namespace SqlLoaderHelper
 
             var currentSpan = TextSpan.FromBounds(position - prefix.Length, position);
             // 过滤缓存的 SQL 文件
-            var matches = SQLFileWatcher.SQLDict
+            var matches = SqlFileCache.SQLDict
                 .Where(f => f.StartsWith(prefix, System.StringComparison.OrdinalIgnoreCase));
 
             var props = ImmutableDictionary<string, string>.Empty

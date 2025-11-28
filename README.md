@@ -8,7 +8,8 @@ Version 1.2 optimized the performance of monitoring changes to SQL files. This r
 ...
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
-		SQLRoot = ./SQLs            //add the sql file's root directory relative path
+		SQLRoot = ./SQLs            //enable the extension and autocomplete & redirect from code to sql file
+        SqlLoaderMetaPrefix = Xdev        //enable the reference count & redirect from sql file to code, if SQLRoot not set, the feature will not enable
 	EndGlobalSection
 ...
 ```
@@ -30,6 +31,8 @@ Additionally, we need to add the following configuration to the .csproj file cor
 you need to create a class named `SqlLoader` in your project, the class should like below:
 
 ```csharp
+namespace Xdev
+
 public class SqlLoader
 {
     private static readonly Dictionary<string, string> _cache = new Dictionary<string, string>();
@@ -53,7 +56,7 @@ public class SqlLoader
 
 ## Features
 
-1.the extension will watch all sql files in your project, the extension will find all sql file's same parent folder as base directory and watch all sql file's change.
+1.The extension will watch all sql files in your project when you set the `SQLRoot` in .sln file, and covert sql files to code name list for auto-complete 
 for example you store all sql files in a folder named `SQLs`,
 ```
 your_solution.sln
@@ -82,9 +85,14 @@ the extension will compose a list like below:
 
 When you type `SqlLoader.Load("Orde` in your code, the extension will provide you with a list like "Orders.CreateOrder", "Orders.UpdateOrder".
 
+2.The extension can help you goto the sql file when you press `F12` Or `Ctrl + Click` on the <sqlcode> in SqlLoader.Load("<sqlcode>")
 
-2.the extension can help you goto the sql file when you press `F12` Or `Ctrl + Click` on the <sqlcode> in SqlLoader.Load("<sqlcode>")
 
+3.The extension can count times of sql file referenced by code, when you set `SqlLoaderMetaPrefix`, and it also support redirect from the sql file to referenced location in code.
+in example code the SqlLoader.Load's full meta name is `Xdev.SqlLoader.Load`, so the SqlLoaderMetaPrefix is `Xdev`
+
+## Demo
+![Image](https://github.com/user-attachments/assets/ed8b0ef5-6493-4d0d-9156-aa032818911b)
 
 ## Tips
 

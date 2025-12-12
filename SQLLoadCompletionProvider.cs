@@ -68,8 +68,9 @@ namespace SqlLoaderHelper
 
         private string GetPrefix(string lineText, int caretIndex)
         {
-            // 找到 SqlLoader.Load(" 前缀
             var trigger = "SqlLoader.Load(\"";
+            if (lineText.Length <= trigger.Length)
+                return null;
             int triggerPos = lineText.LastIndexOf(trigger, caretIndex - 1);
             if (triggerPos == -1)
                 return null;
@@ -78,13 +79,11 @@ namespace SqlLoaderHelper
             if (caretIndex <= start)
                 return "";
 
-            // 光标前输入的文本作为前缀
             return lineText.Substring(start, caretIndex - start);
         }
 
         public override bool ShouldTriggerCompletion(SourceText text, int position, CompletionTrigger trigger, OptionSet options)
         {
-            // 可以根据需要进一步控制触发条件
             return trigger.Kind == CompletionTriggerKind.Insertion;
         }
     }

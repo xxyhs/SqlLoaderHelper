@@ -1,17 +1,15 @@
 ﻿This is a Visual Studio extension that helps you manage sql files in C# projects. Its main features include sql autocomplete in code and support navigation between code and sql file;
 
 ## Prerequisites
-This requires some configuration of the solution file; simply add the relative path between the SQL file root directory and the solution file, as shown in the code below.
-
+Add a configuration file in solution directory named `.sqlloadercfg.json` , and add the following content to it:
 ```
-...
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
-		SQLRoot = ./SQLs            //enable the extension and autocomplete & redirect from code to sql file
-        SqlLoaderMetaPrefix = Xdev        //enable the reference count & redirect from sql file to code, if SQLRoot not set, the feature will not enable
-	EndGlobalSection
-...
+{
+  "SQLRoot": "SQLs", 
+  "SqlLoaderMetaPrefix": "Xdev"
+}
 ```
+- `SQLRoot`: The root directory where all your sql files are stored, relative to the solution directory.
+- `SqlLoaderMetaPrefix`:  optional, the prefix of SqlLoader full meta name, if setted, the extension will count times of sql file referenced by code
 
 This VSIX extension will determine whether to enable it based on whether SQLRoot is set.
 

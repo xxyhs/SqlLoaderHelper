@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace SqlLoaderHelper
 {
-    public class SqlReferenceAnalyzer
+    public class SqlReferenceAnalyzer: IDisposable
     {
         private readonly SemaphoreSlim _calcLock = new SemaphoreSlim(1, 1);
         private DateTime LastUpdateTime = DateTime.MinValue;
@@ -160,6 +160,14 @@ namespace SqlLoaderHelper
             }
 
             return null;
+        }
+
+        public void Dispose()
+        {
+            LastWorkspaceChangeTime = DateTime.Now;
+            LastUpdateTime = DateTime.MinValue;
+            _sqlRefs.Clear();
+            RefreshCallbacks.Clear();
         }
     }
 }

@@ -1,5 +1,4 @@
 ﻿using Microsoft.VisualStudio.Shell;
-using Microsoft.VisualStudio.Shell.Interop;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -9,6 +8,8 @@ namespace SqlLoaderHelper
 {
     public class SqlFileCache : IDisposable
     {
+        public static SqlFileCache Instance = new SqlFileCache();
+
         public static List<string> SQLDict = new List<string>();
 
         private static bool _loading = false;
@@ -16,11 +17,6 @@ namespace SqlLoaderHelper
         private static readonly object _lock = new object();
 
         private FileSystemWatcher fileSystemWatcher;
-
-        public SqlFileCache(IVsSolution solutionService)
-        {
-            ThreadHelper.ThrowIfNotOnUIThread();
-        }
 
         /// <summary>
         /// 将sql文件转换成code
@@ -58,7 +54,6 @@ namespace SqlLoaderHelper
                 _loading = false;
             }
         }
-
 
         public static string GetCorrespondingPathByCode(string code)
         {
@@ -147,6 +142,7 @@ namespace SqlLoaderHelper
             ThreadHelper.ThrowIfNotOnUIThread();
             SQLDict.Clear();
             fileSystemWatcher.Dispose();
+            fileSystemWatcher = null;
         }
     }
 }
